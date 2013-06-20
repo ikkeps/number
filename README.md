@@ -1,15 +1,15 @@
-Description
+number
 ===========
 
-Hello world - like Linux kernel driver that allows to create devices similar to /dev/zero but with arbitrary symbol emmitted.
+Simple hello-world-like Linux kernel driver that allows to create devices similar to /dev/zero but with arbitrary byte emmitted.
 
-Compiling
-=========
+Building
+--------
 
     make all
   
 Usage
-=====
+-----
 
 As superuser execute:
 
@@ -17,6 +17,6 @@ As superuser execute:
   
 After that you can create devices invoking
 
-    ./make_number zeroes 48
+    ./make_number.sh zeroes 48
   
 That will make */dev/zeroes* that emmit zeroes ("0" symbol).
