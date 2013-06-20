@@ -13,9 +13,9 @@ MODULE_LICENSE("Dual BSD/GPL");
 // All we need to store in file private_data is one char, so here is the macros
 #define CHAR_IN_VOID_PTR(p) (*((char*)&(p)))
 
-dev_t device_number;
+static dev_t device_number;
 
-struct cdev device;
+static struct cdev device;
 
 static int number_open(struct inode *inod, struct file *filp){
   CHAR_IN_VOID_PTR(filp->private_data) = (char)MINOR(inod->i_rdev);
