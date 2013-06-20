@@ -20,3 +20,8 @@ After that you can create devices invoking
     ./make_number.sh zeroes 48
   
 That will make */dev/zeroes* that emmit zeroes ("0" symbol).
+
+TODO
+----
+
+Add `mmap` support (looks non-trivial for me now).
