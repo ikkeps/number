@@ -29,4 +29,4 @@ if [ -z "${MAJOR}" ]; then
 fi
 
 mknod /dev/${DEVICE_NAME} c $MAJOR $CODE
-chmod a+r /dev/${DEVICE_NAME}
+chmod a+rw /dev/${DEVICE_NAME}

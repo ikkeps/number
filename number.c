@@ -3,6 +3,8 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/uaccess.h>
+#include <linux/slab.h>
+#include <linux/sched.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -16,26 +18,44 @@ static dev_t device_number;
 static struct cdev device;
 
 static int number_open(struct inode *inod, struct file *filp){
-  CHAR_IN_VOID_PTR(filp->private_data) = (char)MINOR(inod->i_rdev);
+  char *page = kmalloc(PAGE_SIZE, GFP_KERNEL);
+  if (page < 0) return -ENOMEM;
+  memset(page, (char)MINOR(inod->i_rdev), PAGE_SIZE);
+  filp->private_data = page;
   return 0;
 };
 
-static ssize_t number_read(struct file * filp, char __user * buf, size_t size, loff_t * offset){
-  size_t n;
-  char c = CHAR_IN_VOID_PTR(filp->private_data);
+static ssize_t number_read(struct file *filp, char __user *buf, size_t size, loff_t *offset){
+  size_t written, to_write, not_written;
+  char *page = filp->private_data;
 
-  if (!access_ok(ACCESS_WRITE, buf, size)) return -EINVAL;
+  if (size == 0) return 0;
 
-  for(n=0; n<size; n++)
-    __put_user(c, buf + n);
+  if (!access_ok(ACCESS_WRITE, buf, size)) return -EFAULT;
 
+  written = 0;
+  while(written < size){
+    to_write = min(size - written, PAGE_SIZE);
+    not_written = __copy_to_user(buf + written, page, to_write);
+    written += to_write - not_written;
+    // If any pending signal - just return bytes written
+    if(signal_pending(current)) break;
+    // Be nice to others
+    cond_resched();
+  }
+
+  return written;
+};
+
+static ssize_t number_write(struct file *filp, const char __user *buf, size_t size, loff_t *offset){
   return size;
 };
 
 static struct file_operations number_fops = {
   .owner = THIS_MODULE,
   .open = number_open,
-  .read = number_read
+  .read = number_read,
+  .write = number_write,
 };
 
 static __init int number_init(void)
