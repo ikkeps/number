@@ -10,9 +10,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 #define DRIVER_NAME "number"
 
-// All we need to store in file private_data is one char, so here is the macros
-#define CHAR_IN_VOID_PTR(p) (*((char*)&(p)))
-
 static dev_t device_number;
 
 static struct cdev device;
