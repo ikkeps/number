@@ -16,7 +16,7 @@ static struct cdev device;
 
 static int number_open(struct inode *inod, struct file *filp){
   char *page = (char *)__get_free_page(GFP_KERNEL);
-  if (page < 0) return -ENOMEM;
+  if (page == NULL) return -ENOMEM;
   memset(page, (char)MINOR(inod->i_rdev), PAGE_SIZE);
   filp->private_data = page;
   return 0;
