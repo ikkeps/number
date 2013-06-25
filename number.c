@@ -18,10 +18,15 @@ static dev_t device_number;
 static struct cdev device;
 
 static int number_open(struct inode *inod, struct file *filp){
-  char *page = kmalloc(PAGE_SIZE, GFP_KERNEL);
+  char *page = (char *)__get_free_page(GFP_KERNEL);
   if (page < 0) return -ENOMEM;
   memset(page, (char)MINOR(inod->i_rdev), PAGE_SIZE);
   filp->private_data = page;
+  return 0;
+};
+
+static int number_release(struct inode *inod, struct file *filp){
+  free_page((unsigned long)filp->private_data);
   return 0;
 };
 
@@ -54,6 +59,7 @@ static ssize_t number_write(struct file *filp, const char __user *buf, size_t si
 static struct file_operations number_fops = {
   .owner = THIS_MODULE,
   .open = number_open,
+  .release = number_release,
   .read = number_read,
   .write = number_write,
 };
